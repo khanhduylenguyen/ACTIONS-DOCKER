@@ -2,11 +2,11 @@ name: Deploy Spring Boot to Docker Hub
 
 on:
   push:
-    branches: [ "main" ] # Kích hoạt tự động khi Push code lên nhánh main
+    branches: [ "main" ]
 
 jobs:
   build_and_push:
-    runs-on: ubuntu-latest # Mượn máy ảo Ubuntu của GitHub để chạy
+    runs-on: ubuntu-latest
 
     steps:
       - name: Bước 1 - Tải mã nguồn (Checkout code)
@@ -21,18 +21,15 @@ jobs:
       - name: Bước 3 - Build và Push Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: . # Chỉ định thư mục gốc chứa Dockerfile
-          push: true # Cho phép đẩy thẳng lên Docker Hub sau khi Build xong
-          
-          # Đã sửa lại tag thành duanjava cho khớp với kịch bản deploy bên dưới
+          context: .
+          push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/duanjava:latest
 
-      # DÁN ĐOẠN CODE DEPLOY VÀO ĐÂY (Căn lề chuẩn)
       - name: Bước 4 - Triển khai lên DevOps Classroom
         run: |
-          REPO="${{ secrets.DOCKERHUB_USERNAME }}/duanjava:latest"
-          CONTAINER_PORT=80
-          RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${{ secrets.DEPLOY_URL }}?repo=$REPO&tag=latest&slot=4&container_port=$CONTAINER_PORT&strict_container_port=0")
+          REPO="duyle211/duanjava:latest"
+          CONTAINER_PORT=8080
+          RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${{ secrets.DEPLOY_URL }}?repo=$REPO&tag=latest&slot=1&container_port=$CONTAINER_PORT&strict_container_port=0")
           BODY=$(echo "$RESPONSE" | sed "$d")
           CODE=$(echo "$RESPONSE" | tail -n1)
           echo "Webhook HTTP: $CODE"
